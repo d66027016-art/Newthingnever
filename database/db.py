@@ -1,4 +1,5 @@
 import motor.motor_asyncio
+import certifi
 from datetime import datetime, date, timedelta, timezone
 import secrets
 import string
@@ -12,7 +13,7 @@ _db = None
 async def get_db():
     global _client, _db
     if _db is None:
-        _client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
+        _client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL, tlsCAFile=certifi.where())
         _db = _client[DB_NAME]
         try:
             await _ensure_indexes()

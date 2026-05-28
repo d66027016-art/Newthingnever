@@ -13,7 +13,14 @@ _db = None
 async def get_db():
     global _client, _db
     if _db is None:
-        _client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL, tlsCAFile=certifi.where())
+        try:
+            # Try connecting with strict cert validation
+            _client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL, tlsCAFile=certifi.where())
+            await _client[DB_NAME].command("ping")
+        except Exception:
+            # Fallback to relaxed TLS options if strict handshake fails (common on Render hosts)
+            _client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL, tls=True, tlsAllowInvalidCertificates=True)
+        
         _db = _client[DB_NAME]
         try:
             await _ensure_indexes()

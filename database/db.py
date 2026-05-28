@@ -14,7 +14,12 @@ async def get_db():
     if _db is None:
         _client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URL)
         _db = _client[DB_NAME]
-        await _ensure_indexes()
+        try:
+            await _ensure_indexes()
+        except Exception:
+            _client = None
+            _db = None
+            raise
     return _db
 
 

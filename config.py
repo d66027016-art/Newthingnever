@@ -14,36 +14,31 @@ MINI_APP_URL = os.getenv("MINI_APP_URL", "")
 
 BIN_API_URL = "https://bindb.rythampkhandelwal.workers.dev/bin/{bin}"
 
-BOT_NAME = "DAMXD89"
+BOT_NAME = "DAMXD AUTO HITTER"
 BOT_USERNAME = "@Damxd89logsbot"
 SUPPORT_USERNAME = "@DAMXD89"
 OWNER_USERNAME = "@DAMXD89"
 
-FREE_DAILY_LIMIT = 5
+FREE_DAILY_LIMIT = 10
 
 # System-level proxy pool — used when a user has no personal proxy set.
 # Paid users should add their own proxy; free users rotate through these.
 SYSTEM_PROXIES = [
-    "geo.g-w.info:10080:j1ZAX5jRDN54bU31:kV0bwE8IYByihLls",
-    "geo.g-w.info:10080:BWwQZ5bFRqnWmKPm:Qj23ViSE8V90lRaZ",
-    "geo.g-w.info:10080:ronCANdBwfj1rzaV:4EjkKwoKREPgEmSh",
-    "geo.g-w.info:10080:vSbUtrs0BQPcUM75:PjcT7AWg2onuysF7",
-    "geo.g-w.info:10080:KJweQKzGVBvXjmN5:LS8A5YUWXuH2UFUf",
-    "geo.g-w.info:10080:DUCdmEg4jbqsQiZ7:vT7wSnt7Gl47cOyb",
-    "geo.g-w.info:10080:Cq5X15wjTYufCsid:ahLoNIrYuJpKF2SS",
-    "geo.g-w.info:10080:Z5RcVujYO0Oy2qHw:hpuMrTLd3XsuDzjV",
-    "geo.g-w.info:10080:DML3AlYhtC7mTt77:edO1JU9tFG8CPrP6",
-    "geo.g-w.info:10080:x9OjMx5b76kJlVim:WdYTukGZf3wEA61G",
-    "geo.g-w.info:10080:Zn8U8mvLe89v2WOM:aPAGRoYloAFfwbA3",
-    "geo.g-w.info:10080:eBAqrXDQ3ZL8qR1w:oEoJVgHxT7FqvCpT",
-    "geo.g-w.info:10080:yD78uiRfg9cLiBie:JsoFIhHVE9oNep8t",
-    "geo.g-w.info:10080:jF2Wplk0oth9MNPy:vcEfwVVjPZaB9ezE",
-    "geo.g-w.info:10080:38K9vLWph46nkMdB:jN4yJ0tlR2Z4L3OA",
-    "geo.g-w.info:10080:7ly64bRZ9BWkxeC7:7iUcyzNy2RzSzpih",
-    "geo.g-w.info:10080:BcdfOyftUkpCBWYV:BorY8dfAK5gx3ZzV",
-    "geo.g-w.info:10080:LirCtV6QTsI9dFFo:l6Z6YyDGhdGq9z1G",
-    "geo.g-w.info:10080:7QXwCz8xf8ihXuoD:74D9KhSZ57hqFgIB",
-    "geo.g-w.info:10080:xwU5EEa4MwJH7GQE:gfZkUeZuyoQUGM5z",
+    "14.143.222.113:57718",
+    "104.194.144.249:80",
+    "176.111.37.216:39811",
+    "2.26.87.216:1080",
+    "174.138.174.138:8254",
+    "113.192.12.24:8080",
+    "45.13.237.201:3128",
+    "80.90.183.221:3128",
+    "85.192.29.60:3128",
+    "38.194.246.34:999",
+    "89.22.225.204:8080",
+    "148.230.4.241:999",
+    "182.53.202.208:8080",
+    "157.230.28.51:1981",
+    "154.223.188.202:1194",
 ]
 
 PLAN_PRICES = {

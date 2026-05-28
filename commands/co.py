@@ -107,25 +107,71 @@ def clean_stripe_response(text: str) -> str:
 WATERMARK = f"{EMOJI['bolt']} 𝗦𝗧𝗥𝗜𝗣𝗘 𝗛𝗜𝗧𝗧𝗘𝗥 {EMOJI['bolt']}"
 
 
+async def _notify_user_hit(bot: Bot, result: dict, checkout: dict, uid: int, amount_display: str, merchant: str):
+    card_str = result["card"]
+    bin6 = card_str[:6]
+    bin_info = await lookup_bin(bin6)
+    
+    status_label = "CHARGED ✅" if result["status"] == "CHARGED" else "LIVE 🔥"
+    country_display = f"{bin_info['flag']} {bin_info['country_name']}" if bin_info['country_code'] else bin_info['country_name']
+    
+    text = (
+        f"✦ ━━━━━━━ 🎯 <b>HIT FOUND!</b> ━━━━━━━ ✦\n\n"
+        f"💳 <b>Card:</b> <code>{card_str}</code>\n"
+        f"🟢 <b>Status:</b> {status_label}\n"
+        f"💬 <b>Response:</b> <code>{clean_stripe_response(result.get('response'))}</code>\n\n"
+        f"🏪 <b>Merchant:</b> <code>{merchant}</code>\n"
+        f"💰 <b>Amount:</b> <code>{amount_display}</code>\n\n"
+        f"ℹ️ <b>BIN Info:</b>\n"
+        f"├─ <b>Bank:</b> <code>{bin_info['bank']}</code>\n"
+        f"├─ <b>Brand/Type:</b> <code>{bin_info['brand']} / {bin_info['type']}</code>\n"
+        f"├─ <b>Level:</b> <code>{bin_info['category']}</code>\n"
+        f"└─ <b>Country:</b> <code>{country_display}</code>\n\n"
+        f"⏱️ <b>Time:</b> <code>{result['time']}s</code>\n"
+        f"✦ ━━━━━━━━━━━━━━━━━━━━━━━━ ✦"
+    )
+    try:
+        await bot.send_message(uid, text, parse_mode=ParseMode.HTML)
+    except Exception:
+        pass
+
+
 async def _notify_public(bot: Bot, result: dict, checkout_data: dict, first_name: str):
-    """Minimal public notification — no CC, no merchant details."""
+    """Masked public notification with bank and country info."""
     public_ch = await db.get_setting("public_channel", "")
     if not public_ch:
         return
     dc = result.get("decline_code", "")
     if result["status"] == "CHARGED":
-        status_line = f"CHARGED {EMOJI['charged']}"
+        status_line = "CHARGED ✅"
     elif result["status"] == "DECLINED" and dc == "incorrect_cvc":
-        status_line = f"LIVE {EMOJI['live']}"
+        status_line = "LIVE 🔥"
     else:
         return
+
+    card_str = result["card"]
+    bin6 = card_str[:6]
+    bin_info = await lookup_bin(bin6)
+
+    parts = card_str.split("|")
+    cc = parts[0]
+    masked_cc = cc[:6] + "x" * (len(cc) - 10) + cc[-4:] if len(cc) >= 10 else cc[:6] + "xxxxxx"
+    masked_card = f"{masked_cc}|{parts[1]}|{parts[2]}|xxx"
+
+    country_display = f"{bin_info['flag']} {bin_info['country_name']}" if bin_info['country_code'] else bin_info['country_name']
     currency = (checkout_data.get("currency") or "").upper()
+
     text = (
-        f"「 STRIPE HITTER 」\n\n"
-        f"User ❝ {first_name}\n"
-        f"Status ❝ {status_line}\n"
-        f"Currency ❝ <code>{currency}</code>\n\n"
-        f"{WATERMARK}"
+        f"✦ ━━━━━━━ 📣 <b>NEW HIT!</b> ━━━━━━━ ✦\n\n"
+        f"👤 <b>User:</b> {first_name}\n"
+        f"🟢 <b>Status:</b> {status_line}\n"
+        f"💳 <b>Card:</b> <code>{masked_card}</code>\n"
+        f"💰 <b>Currency:</b> <code>{currency}</code>\n\n"
+        f"ℹ️ <b>BIN Info:</b>\n"
+        f"├─ <b>Bank:</b> <code>{bin_info['bank']}</code>\n"
+        f"├─ <b>Brand/Type:</b> <code>{bin_info['brand']} / {bin_info['type']}</code>\n"
+        f"└─ <b>Country:</b> <code>{country_display}</code>\n\n"
+        f"⚡ <i>Join {BOT_USERNAME} to start checking!</i>"
     )
     try:
         target = int(public_ch) if public_ch.lstrip("-").isdigit() else public_ch
@@ -388,6 +434,7 @@ async def _run_hit(msg, bot, uid, cards, checkout, url, proxy, status_msg, amoun
         # Public notification — minimal, no CC
         if is_charged or is_live:
             await _notify_public(bot, result, checkout, msg.from_user.first_name)
+            await _notify_user_hit(bot, result, checkout, uid, amount_display, merchant)
 
         resp = clean_stripe_response(result.get("response", ""))
         dc = result.get("decline_code", "")
@@ -402,7 +449,10 @@ async def _run_hit(msg, bot, uid, cards, checkout, url, proxy, status_msg, amoun
         else:
             s = result["status"]
 
-        block = f"Status: {s}\nResponse: <code>{resp}</code>\nTime: <code>{result['time']}s</code>"
+        block = (
+            f"💳 <code>{result['card']}</code>\n"
+            f"↳ <b>Result:</b> {s} | <b>Resp:</b> <code>{resp}</code> | <b>Time:</b> <code>{result['time']}s</code>"
+        )
         card_blocks.append(block)
 
         now = time.perf_counter()

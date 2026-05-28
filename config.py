@@ -15,7 +15,7 @@ MINI_APP_URL = os.getenv("MINI_APP_URL", "")
 BIN_API_URL = "https://bindb.rythampkhandelwal.workers.dev/bin/{bin}"
 
 BOT_NAME = "DAMXD AUTO HITTER"
-BOT_USERNAME = "@Damxd89logsbot"
+BOT_USERNAME = "@newthingsneverbot"
 SUPPORT_USERNAME = "@DAMXD89"
 OWNER_USERNAME = "@DAMXD89"
 

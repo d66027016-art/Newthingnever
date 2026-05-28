@@ -78,7 +78,7 @@ axios.post(url, data, { headers })
             binResult.classList.add('hidden');
 
             try {
-                const res = await fetch(`/.netlify/functions/api/bin/${bin}`);
+                const res = await fetch(`/api/bin/${bin}`);
                 const data = await res.json();
 
                 if (!res.ok) {
@@ -124,7 +124,7 @@ axios.post(url, data, { headers })
             dashboardResult.classList.add('hidden');
 
             try {
-                const res = await fetch('/.netlify/functions/api/stats', {
+                const res = await fetch('/api/stats', {
                     headers: {
                         'X-API-Key': key
                     }

@@ -205,3 +205,56 @@ async def cmd_broadcast(msg: Message, bot: Bot):
             failed += 1
     
     await status_msg.edit_text(f"「 BROADCAST COMPLETE 」\n\nSent: <code>{sent}</code>\nFailed: <code>{failed}</code>", parse_mode=ParseMode.HTML)
+
+
+@router.message(Command("genapikey", prefix="/."))
+async def cmd_genapikey(msg: Message, command: CommandObject):
+    if not await is_authorized(msg.from_user.id):
+        return
+
+    args = (command.args or "").strip().split()
+    if len(args) < 3:
+        await msg.answer(
+            f"Usage: <code>/genapikey &lt;user_id&gt; &lt;hits_per_day&gt; &lt;plan_type&gt;</code>\n\n"
+            f"Example: <code>/genapikey 8303990517 5000 BUSINESS</code>",
+            parse_mode=ParseMode.HTML
+        )
+        return
+
+    try:
+        target_uid = int(args[0])
+        hits_per_day = int(args[1])
+    except ValueError:
+        await msg.answer("User ID and Hits Per Day must be numbers.")
+        return
+
+    plan_type = args[2].upper()
+    key = await db.create_api_key(target_uid, plan_type, hits_per_day)
+    
+    await msg.answer(
+        f"「 🔑 <b>API KEY GENERATED</b> 」\n\n"
+        f"👤 <b>For User ID:</b> <code>{target_uid}</code>\n"
+        f"✨ <b>Plan:</b> <code>{plan_type}</code>\n"
+        f"📊 <b>Daily Quota:</b> <code>{hits_per_day}</code> hits\n"
+        f"🗝️ <b>Key:</b> <code>{key}</code>\n\n"
+        f"⚠️ <i>Keep this key secret. Never expose it in client-side code!</i>",
+        parse_mode=ParseMode.HTML
+    )
+
+
+@router.message(Command("revokeapikey", prefix="/."))
+async def cmd_revokeapikey(msg: Message, command: CommandObject):
+    if not await is_authorized(msg.from_user.id):
+        return
+
+    key = (command.args or "").strip()
+    if not key:
+        await msg.answer("Usage: <code>/revokeapikey &lt;api_key&gt;</code>", parse_mode=ParseMode.HTML)
+        return
+
+    ok = await db.revoke_api_key(key)
+    if ok:
+        await msg.answer(f"✅ API Key revoked and disabled successfully.", parse_mode=ParseMode.HTML)
+    else:
+        await msg.answer(f"❌ API Key not found or already inactive.", parse_mode=ParseMode.HTML)
+

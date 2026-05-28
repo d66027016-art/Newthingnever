@@ -422,3 +422,29 @@ async def cmd_delbin(msg: Message, command: CommandObject):
         return
     await db.delete_saved_bin(msg.from_user.id, name)
     await msg.answer(f"{EMOJI['charged']} BIN <b>{name}</b> removed.", parse_mode=ParseMode.HTML)
+
+
+@router.message(Command("myapi", prefix="/."))
+async def cmd_myapi(msg: Message):
+    uid = msg.from_user.id
+    keys = await db.get_user_api_keys(uid)
+    if not keys:
+        await msg.answer(
+            f"❌ <b>No API Keys found.</b>\n\n"
+            f"💡 <i>Contact support/admins to purchase or generate a Business API key.</i>",
+            parse_mode=ParseMode.HTML
+        )
+        return
+
+    text = f"🔑 <b>YOUR BUSINESS API KEYS:</b>\n\n"
+    for i, k in enumerate(keys):
+        status_label = "🟢 Active" if k["is_active"] else "🔴 Revoked"
+        limit_label = f"<code>{k['hits_per_day']}</code>" if k["hits_per_day"] > 0 else "Unlimited"
+        text += (
+            f"<b>Key {i+1}:</b> <code>{k['key']}</code>\n"
+            f"├─ <b>Status:</b> {status_label}\n"
+            f"├─ <b>Plan:</b> <code>{k['plan_type']}</code>\n"
+            f"└─ <b>Quota:</b> <code>{k['daily_count']}</code> / {limit_label} hits today\n\n"
+        )
+    await msg.answer(text, parse_mode=ParseMode.HTML)
+

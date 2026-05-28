@@ -37,6 +37,8 @@ async def _ensure_indexes():
     await db.admins.create_index("user_id", unique=True)
     await db.saved_bins.create_index([("user_id", 1), ("name", 1)], unique=True)
     await db.bot_settings.create_index("key", unique=True)
+    await db.api_keys.create_index("key", unique=True)
+    await db.api_keys.create_index("user_id")
 
 
 # ─── User CRUD ───
@@ -459,3 +461,64 @@ async def clear_daily_cache():
 async def get_total_users_count() -> int:
     db = await get_db()
     return await db.users.count_documents({})
+
+
+# ─── API Keys ───
+
+async def create_api_key(user_id: int, plan_type: str, hits_per_day: int) -> str:
+    db = await get_db()
+    # Cryptographically secure key: damxd_live_...
+    token = secrets.token_hex(20)
+    key = f"damxd_live_{token}"
+    await db.api_keys.insert_one({
+        "key": key,
+        "user_id": user_id,
+        "plan_type": plan_type,
+        "hits_per_day": hits_per_day,
+        "daily_count": 0,
+        "total_count": 0,
+        "last_reset_date": date.today().isoformat(),
+        "is_active": True,
+        "created_at": datetime.now(timezone.utc).isoformat()
+    })
+    return key
+
+
+async def get_api_key_info(key: str) -> dict:
+    db = await get_db()
+    row = await db.api_keys.find_one({"key": key})
+    if not row:
+        return None
+
+    # Check for daily auto-reset
+    today = date.today().isoformat()
+    if row.get("last_reset_date") != today:
+        await db.api_keys.update_one(
+            {"key": key},
+            {"$set": {"daily_count": 0, "last_reset_date": today}}
+        )
+        row["daily_count"] = 0
+        row["last_reset_date"] = today
+
+    return row
+
+
+async def increment_api_key_hits(key: str):
+    db = await get_db()
+    await db.api_keys.update_one(
+        {"key": key},
+        {"$inc": {"daily_count": 1, "total_count": 1}}
+    )
+
+
+async def revoke_api_key(key: str) -> bool:
+    db = await get_db()
+    res = await db.api_keys.update_one({"key": key}, {"$set": {"is_active": False}})
+    return res.modified_count > 0
+
+
+async def get_user_api_keys(user_id: int) -> list:
+    db = await get_db()
+    cursor = db.api_keys.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1)
+    return await cursor.to_list(length=50)
+

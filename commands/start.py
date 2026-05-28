@@ -448,3 +448,24 @@ async def cmd_myapi(msg: Message):
         )
     await msg.answer(text, parse_mode=ParseMode.HTML)
 
+
+@router.message(Command("id", prefix="/."))
+async def cmd_id(msg: Message):
+    if msg.reply_to_message:
+        target_user = msg.reply_to_message.from_user
+        if target_user:
+            text = (
+                f"👤 <b>User:</b> {target_user.mention_html()}\n"
+                f"🆔 <b>User ID:</b> <code>{target_user.id}</code>\n"
+                f"💬 <b>Chat ID:</b> <code>{msg.chat.id}</code>"
+            )
+        else:
+            text = f"🆔 <b>Chat ID:</b> <code>{msg.chat.id}</code>"
+    else:
+        text = (
+            f"👤 <b>Your Profile:</b> {msg.from_user.mention_html()}\n"
+            f"🆔 <b>Your User ID:</b> <code>{msg.from_user.id}</code>\n"
+            f"💬 <b>Chat ID:</b> <code>{msg.chat.id}</code>"
+        )
+    await msg.answer(text, parse_mode=ParseMode.HTML)
+

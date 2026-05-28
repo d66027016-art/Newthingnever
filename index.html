@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAMXD Hitter & API - Premium Payment Automation</title>
+    <meta name="description" content="Enterprise-grade credit card checking, BIN lookup, and Stripe payment integration API. Built for high-speed, secure automation.">
+    <link rel="stylesheet" href="style.css">
+    <script defer src="app.js"></script>
+</head>
+<body>
+    <!-- SVG Logo Gradient Definition -->
+    <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+        <linearGradient id="logo-grad" x2="1" y2="1">
+            <stop offset="0%" stop-color="#8b5cf6" />
+            <stop offset="100%" stop-color="#10b981" />
+        </linearGradient>
+    </svg>
+
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <a href="#" class="logo">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2L2 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+                DAMXD
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#tools">Console Tools</a></li>
+                    <li><a href="#docs">API Docs</a></li>
+                    <li><a href="#pricing">Pricing</a></li>
+                    <li><a href="https://t.me/Damxd89" class="btn btn-primary btn-sm" target="_blank">Telegram Bot</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero container">
+        <h1>High-Speed Payment Automation & <span>Stripe API</span></h1>
+        <p>Reliable, developer-friendly card verification, Stripe checkout processing, and real-time BIN database query API for modern online businesses.</p>
+        <div class="cta-group">
+            <a href="#tools" class="btn btn-primary">Try Developer Console</a>
+            <a href="#docs" class="btn btn-secondary">API Reference</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="section container">
+        <h2 class="section-title">Why Developers Choose <span>DAMXD</span></h2>
+        <div class="features-grid">
+            <div class="glass-card feature-card">
+                <div class="icon-wrapper">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/>
+                        <line x1="2" y1="10" x2="22" y2="10"/>
+                    </svg>
+                </div>
+                <h3>Stripe Automation</h3>
+                <p>Seamlessly check Stripe checkout URLs for charges, custom fields, and payment status updates automatically.</p>
+            </div>
+            <div class="glass-card feature-card">
+                <div class="icon-wrapper">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                </div>
+                <h3>Sub-Second Latency</h3>
+                <p>Fully optimized parallel threads and distributed premium proxies mean checking is done in less than 3 seconds.</p>
+            </div>
+            <div class="glass-card feature-card">
+                <div class="icon-wrapper">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                    </svg>
+                </div>
+                <h3>Enterprise Proxies</h3>
+                <p>Equipped with residential rotating proxies that naturally bypass cloud protection, minimizing declines.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Console / Live Demo Tools -->
+    <section id="tools" class="section container">
+        <h2 class="section-title">Developer <span>Console Tools</span></h2>
+        <div class="interactive-section">
+            <!-- BIN Lookup Tool -->
+            <div class="glass-card">
+                <h3 style="margin-bottom:1.5rem;font-family:var(--font-heading);">🔍 BIN Lookup Utility</h3>
+                <form id="bin-form">
+                    <div class="form-group">
+                        <label for="bin-input">Enter 6-digit BIN Prefix</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="bin-input" class="input-control" placeholder="e.g. 453201" maxlength="6" required>
+                        </div>
+                    </div>
+                    <button type="submit" id="bin-btn" class="btn btn-primary" style="width:100%;">
+                        Lookup BIN <span id="bin-loader" class="loader hidden" style="margin-left:8px;"></span>
+                    </button>
+                </form>
+                
+                <div id="bin-result" class="dashboard-display hidden">
+                    <div class="stat-row">
+                        <span class="stat-label">BIN Prefix</span>
+                        <span class="stat-value" id="res-bin">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Brand</span>
+                        <span class="stat-value text-accent" id="res-brand">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Card Type</span>
+                        <span class="stat-value" id="res-type">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Category</span>
+                        <span class="stat-value" id="res-category">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Issuing Bank</span>
+                        <span class="stat-value" id="res-bank">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Country</span>
+                        <span class="stat-value" id="res-country">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Developer Console -->
+            <div class="glass-card">
+                <h3 style="margin-bottom:1.5rem;font-family:var(--font-heading);">🔑 Developer Stats Console</h3>
+                <form id="key-form">
+                    <div class="form-group">
+                        <label for="key-input">Enter Business API Key</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="key-input" class="input-control" placeholder="e.g. damxd_live_..." required>
+                        </div>
+                    </div>
+                    <button type="submit" id="key-btn" class="btn btn-secondary" style="width:100%;">
+                        Query Stats <span id="key-loader" class="loader hidden" style="margin-left:8px;"></span>
+                    </button>
+                </form>
+
+                <div id="dashboard-result" class="dashboard-display hidden">
+                    <div class="stat-row">
+                        <span class="stat-label">Status</span>
+                        <span class="badge" id="dash-status">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Plan Tier</span>
+                        <span class="stat-value" id="dash-plan">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Quota Used Today</span>
+                        <span class="stat-value" id="dash-quota">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Total Checks</span>
+                        <span class="stat-value" id="dash-total">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Created At</span>
+                        <span class="stat-value" id="dash-created">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Reference Docs -->
+    <section id="docs" class="section container">
+        <h2 class="section-title">Developer <span>API Integration</span></h2>
+        <div class="glass-card docs-layout">
+            <div class="docs-nav">
+                <button class="docs-nav-btn active" data-tab="python">Python (Requests)</button>
+                <button class="docs-nav-btn" data-tab="nodejs">Node.js (Axios)</button>
+                <button class="docs-nav-btn" data-tab="curl">cURL Command</button>
+            </div>
+            <div>
+                <div class="code-container">
+                    <pre><code id="code-display"># Loading...</code></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="section container">
+        <h2 class="section-title">Flexible <span>Business Plans</span></h2>
+        <div class="pricing-grid">
+            <div class="glass-card pricing-card">
+                <div class="pricing-header">
+                    <h3>Free Plan</h3>
+                    <p>For testing and small projects</p>
+                    <div class="price">$0<span>/month</span></div>
+                </div>
+                <ul class="pricing-features">
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 10 checks per day limit</li>
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Access to Telegram Bot</li>
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Standard shared proxies</li>
+                </ul>
+                <a href="https://t.me/Damxd89" class="btn btn-secondary" target="_blank">Start Free</a>
+            </div>
+
+            <div class="glass-card pricing-card popular">
+                <span class="popular-badge">RECOMMENDED</span>
+                <div class="pricing-header">
+                    <h3>Developer Pro</h3>
+                    <p>For serious automation workloads</p>
+                    <div class="price">$25<span>/month</span></div>
+                </div>
+                <ul class="pricing-features">
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Unlimited Bot usage</li>
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Custom private proxy support</li>
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Leaderboard access & rankings</li>
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> 24/7 dedicated customer support</li>
+                </ul>
+                <a href="https://t.me/Damxd89" class="btn btn-primary" target="_blank">Upgrade to Pro</a>
+            </div>
+
+            <div class="glass-card pricing-card">
+                <div class="pricing-header">
+                    <h3>Business Enterprise</h3>
+                    <p>For custom platform integration</p>
+                    <div class="price">Custom<span>/quota</span></div>
+                </div>
+                <ul class="pricing-features">
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Custom high-volume REST API keys</li>
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Custom endpoints & proxy routing</li>
+                    <li><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg> Integrated developer analytics</li>
+                </ul>
+                <a href="https://t.me/Damxd89" class="btn btn-secondary" target="_blank">Contact Owner</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 DAMXD Services. All rights reserved.</p>
+            <p>Made for secure payment automation. Contact <a href="https://t.me/Damxd89" target="_blank">@Damxd89</a>.</p>
+        </div>
+    </footer>
+</body>
+</html>

@@ -308,6 +308,74 @@ axios.post(url, data, { headers })
             });
         }
         
+        // Stripe Card Checker Form Submit
+        const miniCheckForm = document.getElementById('mini-check-form');
+        const miniCheckUrl = document.getElementById('mini-check-url');
+        const miniCheckCard = document.getElementById('mini-check-card');
+        const miniCheckBtn = document.getElementById('mini-check-btn');
+        const miniCheckLoader = document.getElementById('mini-check-loader');
+        const miniCheckResult = document.getElementById('mini-check-result');
+
+        if (miniCheckForm) {
+            miniCheckForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const key = miniApiKeyInput ? miniApiKeyInput.value : '';
+                if (!key || key.startsWith('Loading')) {
+                    alert('API Key not loaded yet. Please wait.');
+                    return;
+                }
+
+                miniCheckBtn.disabled = true;
+                if (miniCheckLoader) miniCheckLoader.classList.remove('hidden');
+                miniCheckResult.classList.add('hidden');
+
+                try {
+                    const res = await fetch('/api/check', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': key
+                        },
+                        body: JSON.stringify({
+                            url: miniCheckUrl.value.trim(),
+                            card: miniCheckCard.value.trim()
+                        })
+                    });
+                    const data = await res.json();
+
+                    if (!res.ok) {
+                        throw new Error(data.error || 'Check request failed.');
+                    }
+
+                    const result = data.result;
+                    document.getElementById('mini-chk-card').textContent = result.card;
+                    
+                    const statusVal = document.getElementById('mini-chk-status');
+                    statusVal.textContent = result.status;
+                    if (result.status === 'CHARGED' || result.status.includes('LIVE')) {
+                        statusVal.className = 'stat-value text-accent';
+                    } else {
+                        statusVal.className = 'stat-value text-danger';
+                    }
+
+                    document.getElementById('mini-chk-response').textContent = result.response || '-';
+                    document.getElementById('mini-chk-merchant').textContent = data.merchant || 'Unknown';
+                    document.getElementById('mini-chk-amount').textContent = `${data.price} ${data.currency}`;
+                    document.getElementById('mini-chk-time').textContent = `${result.time}s`;
+
+                    miniCheckResult.classList.remove('hidden');
+                    
+                    // Refresh stats to show updated quota
+                    loadUserStats();
+                } catch (err) {
+                    alert(err.message);
+                } finally {
+                    miniCheckBtn.disabled = false;
+                    if (miniCheckLoader) miniCheckLoader.classList.add('hidden');
+                }
+            });
+        }
+
         // Admin Generate Form submit
         const miniAdminGenForm = document.getElementById('mini-admin-gen-form');
         const adminUserId = document.getElementById('admin-user-id');

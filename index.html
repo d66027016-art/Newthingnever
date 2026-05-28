@@ -66,6 +66,52 @@
                 </button>
             </div>
 
+            <!-- Stripe Card Checker Card -->
+            <div class="glass-card checker-card">
+                <h4 class="card-title">Stripe Card Hitter</h4>
+                <p class="text-muted text-sm">Submit Stripe checkout URLs directly for processing.</p>
+                <form id="mini-check-form" class="mt-2">
+                    <div class="form-group">
+                        <label>Checkout URL</label>
+                        <input type="url" class="input-control" id="mini-check-url" placeholder="https://checkout.stripe.com/..." required>
+                    </div>
+                    <div class="form-group">
+                        <label>Card Details</label>
+                        <input type="text" class="input-control" id="mini-check-card" placeholder="cc|mm|yy|cvv" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full btn-sm" id="mini-check-btn">
+                        <span class="loader hidden" id="mini-check-loader" style="margin-right: 0.5rem; width: 12px; height: 12px;"></span>
+                        <span>Process Check</span>
+                    </button>
+                </form>
+                <div id="mini-check-result" class="hidden mt-3 p-3 border border-color rounded bg-secondary">
+                    <div class="stat-row">
+                        <span class="stat-label">Card</span>
+                        <span class="stat-value" id="mini-chk-card" style="font-family: monospace;">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Status</span>
+                        <span class="stat-value" id="mini-chk-status">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Response</span>
+                        <span class="stat-value" id="mini-chk-response">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Merchant</span>
+                        <span class="stat-value" id="mini-chk-merchant">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Amount</span>
+                        <span class="stat-value" id="mini-chk-amount">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Duration</span>
+                        <span class="stat-value" id="mini-chk-time">-</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Mobile BIN Lookup Tool Card -->
             <div class="glass-card bin-card">
                 <h4 class="card-title">Quick BIN Lookup</h4>

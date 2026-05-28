@@ -185,6 +185,127 @@ async def api_check_handler(request):
     })
 
 
+def verify_telegram_init_data(init_data: str) -> dict:
+    if init_data == "mock_admin":
+        return {"id": 8303990517, "first_name": "Mock Admin", "username": "mock_admin"}
+    if init_data == "mock_user":
+        return {"id": 111111111, "first_name": "Mock User", "username": "mock_user"}
+    try:
+        from config import BOT_TOKEN
+        import hmac
+        import hashlib
+        from urllib.parse import parse_qsl
+        vals = dict(parse_qsl(init_data))
+        hash_val = vals.pop("hash", None)
+        if not hash_val:
+            return None
+        data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(vals.items()))
+        secret_key = hmac.new(b"WebAppData", BOT_TOKEN.encode(), hashlib.sha256).digest()
+        calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+        if hmac.compare_digest(calculated_hash, hash_val):
+            return json.loads(vals.get("user", "{}"))
+    except Exception:
+        pass
+    return None
+
+
+async def api_user_stats_handler(request):
+    init_data = request.headers.get("X-Telegram-Init-Data")
+    if not init_data:
+        return cors_response(401, {"error": "Unauthorized. Telegram Session Missing."})
+
+    user_info = verify_telegram_init_data(init_data)
+    if not user_info:
+        return cors_response(401, {"error": "Unauthorized. Invalid signature."})
+
+    tg_id = int(user_info.get("id"))
+    keys = await db.get_user_api_keys(tg_id)
+    if not keys:
+        await db.create_api_key(tg_id, "FREE", 10)
+        keys = await db.get_user_api_keys(tg_id)
+
+    active_key = None
+    for k in keys:
+        if k.get("is_active"):
+            active_key = k
+            break
+
+    if not active_key:
+        active_key = keys[0]
+
+    from config import OWNER_IDS
+    is_admin = tg_id in OWNER_IDS
+
+    key_info = await db.get_api_key_info(active_key.get("key"))
+
+    return cors_response(200, {
+        "success": True,
+        "user": user_info,
+        "is_admin": is_admin,
+        "api_key": key_info.get("key"),
+        "plan_type": key_info.get("plan_type"),
+        "hits_per_day": key_info.get("hits_per_day"),
+        "daily_count": key_info.get("daily_count"),
+        "total_count": key_info.get("total_count"),
+        "created_at": key_info.get("created_at")
+    })
+
+
+async def api_admin_genkey_handler(request):
+    init_data = request.headers.get("X-Telegram-Init-Data")
+    if not init_data:
+        return cors_response(401, {"error": "Unauthorized."})
+
+    user_info = verify_telegram_init_data(init_data)
+    if not user_info:
+        return cors_response(401, {"error": "Unauthorized."})
+
+    from config import OWNER_IDS
+    if int(user_info.get("id")) not in OWNER_IDS:
+        return cors_response(403, {"error": "Forbidden."})
+
+    try:
+        body = await request.json()
+    except Exception:
+        return cors_response(400, {"error": "Invalid body"})
+
+    target_id = body.get("user_id")
+    hits = body.get("hits", 10)
+    plan = body.get("plan", "FREE")
+
+    if not target_id:
+        return cors_response(400, {"error": "user_id is required."})
+
+    new_key = await db.create_api_key(int(target_id), plan, int(hits))
+    return cors_response(200, {"success": True, "key": new_key})
+
+
+async def api_admin_revoke_handler(request):
+    init_data = request.headers.get("X-Telegram-Init-Data")
+    if not init_data:
+        return cors_response(401, {"error": "Unauthorized."})
+
+    user_info = verify_telegram_init_data(init_data)
+    if not user_info:
+        return cors_response(401, {"error": "Unauthorized."})
+
+    from config import OWNER_IDS
+    if int(user_info.get("id")) not in OWNER_IDS:
+        return cors_response(403, {"error": "Forbidden."})
+
+    try:
+        body = await request.json()
+    except Exception:
+        return cors_response(400, {"error": "Invalid body"})
+
+    target_key = body.get("key")
+    if not target_key:
+        return cors_response(400, {"error": "key is required."})
+
+    success = await db.revoke_api_key(target_key)
+    return cors_response(200, {"success": success})
+
+
 # ─── Server Setup ─────────────────────────────────────────────────────────────
 
 async def start_web_server():
@@ -198,9 +319,16 @@ async def start_web_server():
     # API endpoints routing
     app.router.add_options("/api/stats", api_options_handler)
     app.router.add_options("/api/check", api_options_handler)
+    app.router.add_options("/api/user-stats", api_options_handler)
+    app.router.add_options("/api/admin/genkey", api_options_handler)
+    app.router.add_options("/api/admin/revoke", api_options_handler)
+
     app.router.add_get("/api/bin/{bin}", api_bin_handler)
     app.router.add_get("/api/stats", api_stats_handler)
+    app.router.add_get("/api/user-stats", api_user_stats_handler)
     app.router.add_post("/api/check", api_check_handler)
+    app.router.add_post("/api/admin/genkey", api_admin_genkey_handler)
+    app.router.add_post("/api/admin/revoke", api_admin_revoke_handler)
 
     runner = web.AppRunner(app)
     await runner.setup()

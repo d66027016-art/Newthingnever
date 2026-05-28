@@ -1,4 +1,5 @@
 [build]
+  command = "rm -rf netlify/functions/database netlify/functions/commands netlify/functions/functions && cp -r database netlify/functions/ && cp -r commands netlify/functions/ && cp -r functions netlify/functions/ && cp config.py netlify/functions/ && cp requirements.txt netlify/functions/"
   publish = "."
 
 [build.environment]

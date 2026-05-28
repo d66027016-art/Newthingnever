@@ -157,4 +157,198 @@ axios.post(url, data, { headers })
             }
         });
     }
+
+    // ─── Telegram Mini App Logic ───
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    
+    // Check if we are inside Telegram or testing with ?mock=1
+    const urlParams = new URLSearchParams(window.location.search);
+    const isMock = urlParams.get('mock') || urlParams.get('tgWebAppStartParam') === 'mock';
+    
+    if ((tg && tg.initData) || isMock) {
+        document.body.classList.add('telegram-mode');
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+        
+        // Mock initData if requested
+        const initData = tg && tg.initData ? tg.initData : (isMock === 'admin' ? 'mock_admin' : 'mock_user');
+        
+        // Elements
+        const miniUserName = document.getElementById('mini-user-name');
+        const miniUserUsername = document.getElementById('mini-user-username');
+        const miniUserAvatar = document.getElementById('mini-user-avatar');
+        const miniUserBadge = document.getElementById('mini-user-badge');
+        const miniProgressBar = document.getElementById('mini-progress-bar');
+        const miniHitsValue = document.getElementById('mini-hits-value');
+        const miniTotalChecks = document.getElementById('mini-total-checks');
+        const miniPlanStatus = document.getElementById('mini-plan-status');
+        const miniApiKeyInput = document.getElementById('mini-api-key');
+        const miniAdminPanel = document.getElementById('mini-admin-panel');
+        const miniStatsLoader = document.getElementById('mini-stats-loader');
+        
+        // Copy Key Button
+        const btnCopyKey = document.getElementById('btn-copy-key');
+        if (btnCopyKey) {
+            btnCopyKey.addEventListener('click', () => {
+                navigator.clipboard.writeText(miniApiKeyInput.value);
+                btnCopyKey.textContent = 'Copied!';
+                setTimeout(() => { btnCopyKey.textContent = 'Copy'; }, 2000);
+            });
+        }
+        
+        // Load User Stats Function
+        async function loadUserStats() {
+            if (miniStatsLoader) miniStatsLoader.classList.remove('hidden');
+            try {
+                const res = await fetch('/api/user-stats', {
+                    headers: {
+                        'X-Telegram-Init-Data': initData
+                    }
+                });
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.error || 'Failed to load stats.');
+                }
+                
+                // Update profile card
+                const firstName = data.user.first_name || 'Developer';
+                if (miniUserName) miniUserName.textContent = firstName;
+                if (miniUserUsername) miniUserUsername.textContent = data.user.username ? '@' + data.user.username : '';
+                if (miniUserAvatar) miniUserAvatar.textContent = firstName.charAt(0).toUpperCase();
+                
+                // Update badge and plan status
+                if (miniUserBadge) miniUserBadge.textContent = data.plan_type;
+                if (miniPlanStatus) miniPlanStatus.textContent = data.plan_type;
+                
+                // Update key
+                if (miniApiKeyInput) miniApiKeyInput.value = data.api_key;
+                
+                // Update quota stats
+                const dailyUsed = data.daily_count || 0;
+                const dailyLimit = data.hits_per_day || 0;
+                if (miniHitsValue) miniHitsValue.textContent = `${dailyUsed} / ${dailyLimit > 0 ? dailyLimit : '∞'}`;
+                if (miniTotalChecks) miniTotalChecks.textContent = data.total_count || 0;
+                
+                // Update progress bar
+                if (miniProgressBar) {
+                    if (dailyLimit > 0) {
+                        const pct = Math.min((dailyUsed / dailyLimit) * 100, 100);
+                        miniProgressBar.style.width = pct + '%';
+                    } else {
+                        miniProgressBar.style.width = '100%';
+                    }
+                }
+                
+                // Admin checks
+                if (miniAdminPanel) {
+                    if (data.is_admin) {
+                        miniAdminPanel.classList.remove('hidden');
+                    } else {
+                        miniAdminPanel.classList.add('hidden');
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                if (miniUserName) miniUserName.textContent = 'Error Loading Stats';
+            } finally {
+                if (miniStatsLoader) miniStatsLoader.classList.add('hidden');
+            }
+        }
+        
+        // Refresh Button
+        const btnRefresh = document.getElementById('btn-refresh-stats');
+        if (btnRefresh) {
+            btnRefresh.addEventListener('click', loadUserStats);
+        }
+        
+        // Initial load
+        loadUserStats();
+        
+        // Mini BIN Form submit
+        const miniBinForm = document.getElementById('mini-bin-form');
+        const miniBinInput = document.getElementById('mini-bin-input');
+        const miniBinResult = document.getElementById('mini-bin-result');
+        const miniBinBtn = document.getElementById('mini-bin-btn');
+        
+        if (miniBinForm) {
+            miniBinForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const bin = miniBinInput.value.trim().replace(/\D/g, '');
+                if (bin.length < 6) {
+                    alert('Please enter at least 6 digits.');
+                    return;
+                }
+                
+                miniBinBtn.disabled = true;
+                miniBinResult.classList.add('hidden');
+                
+                try {
+                    const res = await fetch(`/api/bin/${bin}`);
+                    const data = await res.json();
+                    
+                    if (!res.ok) {
+                        throw new Error(data.error || 'Failed to search BIN.');
+                    }
+                    
+                    document.getElementById('mini-res-bin').textContent = data.bin || bin;
+                    document.getElementById('mini-res-brand').textContent = (data.brand || 'Unknown').toUpperCase();
+                    document.getElementById('mini-res-type').textContent = (data.type || 'Unknown').toUpperCase();
+                    document.getElementById('mini-res-bank').textContent = data.bank || 'Unknown';
+                    document.getElementById('mini-res-country').textContent = `${data.flag || ''} ${data.country_name || 'Unknown'}`;
+                    
+                    miniBinResult.classList.remove('hidden');
+                } catch (err) {
+                    alert(err.message);
+                } finally {
+                    miniBinBtn.disabled = false;
+                }
+            });
+        }
+        
+        // Admin Generate Form submit
+        const miniAdminGenForm = document.getElementById('mini-admin-gen-form');
+        const adminUserId = document.getElementById('admin-user-id');
+        const adminHits = document.getElementById('admin-hits');
+        const adminPlan = document.getElementById('admin-plan');
+        const adminGenResult = document.getElementById('admin-gen-result');
+        
+        if (miniAdminGenForm) {
+            miniAdminGenForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                adminGenResult.classList.add('hidden');
+                
+                try {
+                    const res = await fetch('/api/admin/genkey', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Telegram-Init-Data': initData
+                        },
+                        body: JSON.stringify({
+                            user_id: adminUserId.value.trim(),
+                            hits: adminHits.value,
+                            plan: adminPlan.value
+                        })
+                    });
+                    const data = await res.json();
+                    
+                    if (!res.ok) {
+                        throw new Error(data.error || 'Failed to generate key.');
+                    }
+                    
+                    adminGenResult.innerHTML = `<strong>Success! API Key Generated:</strong><br><code style="color:var(--color-accent);">${data.key}</code>`;
+                    adminGenResult.classList.remove('hidden');
+                    
+                    // Clear input
+                    adminUserId.value = '';
+                } catch (err) {
+                    adminGenResult.innerHTML = `<span class="text-danger">Error: ${err.message}</span>`;
+                    adminGenResult.classList.remove('hidden');
+                }
+            });
+        }
+    }
 });

@@ -6,9 +6,129 @@
     <title>DAMXD Hitter & API - Premium Payment Automation</title>
     <meta name="description" content="Enterprise-grade credit card checking, BIN lookup, and Stripe payment integration API. Built for high-speed, secure automation.">
     <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script defer src="app.js"></script>
 </head>
 <body>
+    <!-- Telegram Mini App View (Active when loaded inside Telegram) -->
+    <div id="telegram-mini-app-view" class="hidden">
+        <div class="mini-app-container">
+            <!-- Header User Card -->
+            <div class="glass-card user-profile-card">
+                <div class="user-header">
+                    <div class="user-avatar" id="mini-user-avatar">
+                        <span>U</span>
+                    </div>
+                    <div class="user-info">
+                        <h3 id="mini-user-name">Loading Profile...</h3>
+                        <p id="mini-user-username">@username</p>
+                    </div>
+                    <span class="badge badge-active" id="mini-user-badge">FREE</span>
+                </div>
+            </div>
+
+            <!-- Stats/Quota Progress Card -->
+            <div class="glass-card stats-card">
+                <h4 class="card-title">API Daily Quota</h4>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="mini-progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="quota-text-row">
+                    <span id="mini-hits-label">Hits Used Today</span>
+                    <span id="mini-hits-value">0 / 0</span>
+                </div>
+                
+                <div class="stat-grid mt-4">
+                    <div class="stat-item">
+                        <div class="stat-lbl">Total Checks</div>
+                        <div class="stat-val" id="mini-total-checks">0</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-lbl">Plan Type</div>
+                        <div class="stat-val text-accent" id="mini-plan-status">FREE</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Credentials Card -->
+            <div class="glass-card credentials-card">
+                <h4 class="card-title">Developer Credentials</h4>
+                <div class="form-group mt-2">
+                    <label>Your API Key</label>
+                    <div class="input-wrapper">
+                        <input type="text" class="input-control" id="mini-api-key" readonly value="Loading key...">
+                        <button class="btn btn-primary btn-sm" id="btn-copy-key" style="margin-left: 0.5rem; white-space: nowrap;">Copy</button>
+                    </div>
+                </div>
+                <button class="btn btn-secondary w-full btn-sm mt-3" id="btn-refresh-stats">
+                    <span class="loader hidden" id="mini-stats-loader" style="margin-right: 0.5rem; width: 12px; height: 12px;"></span>
+                    <span>Refresh Dashboard</span>
+                </button>
+            </div>
+
+            <!-- Mobile BIN Lookup Tool Card -->
+            <div class="glass-card bin-card">
+                <h4 class="card-title">Quick BIN Lookup</h4>
+                <form id="mini-bin-form" class="mt-2">
+                    <div class="input-wrapper">
+                        <input type="text" class="input-control" id="mini-bin-input" placeholder="Enter 6-digit BIN..." maxlength="6" style="margin-right: 0.5rem;">
+                        <button type="submit" class="btn btn-primary btn-sm" id="mini-bin-btn">Search</button>
+                    </div>
+                </form>
+                <div id="mini-bin-result" class="hidden mt-3">
+                    <div class="stat-row">
+                        <span class="stat-label">BIN</span>
+                        <span class="stat-value" id="mini-res-bin">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Brand</span>
+                        <span class="stat-value" id="mini-res-brand">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Type</span>
+                        <span class="stat-value" id="mini-res-type">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Bank</span>
+                        <span class="stat-value" id="mini-res-bank">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Country</span>
+                        <span class="stat-value" id="mini-res-country">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Control Panel Card -->
+            <div class="glass-card admin-card hidden" id="mini-admin-panel">
+                <h4 class="card-title text-danger">Admin Command Panel</h4>
+                <p class="text-muted text-sm">Issue or revoke API credentials for other users.</p>
+                
+                <form id="mini-admin-gen-form" class="mt-3">
+                    <div class="form-group">
+                        <label>Telegram User ID</label>
+                        <input type="text" class="input-control" id="admin-user-id" placeholder="e.g. 12345678" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hits Per Day</label>
+                        <input type="number" class="input-control" id="admin-hits" placeholder="e.g. 5000" value="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Plan Type</label>
+                        <select class="input-control" id="admin-plan">
+                            <option value="FREE">Free</option>
+                            <option value="PREMIUM" selected>Premium</option>
+                            <option value="ULTRA">Ultra</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full btn-sm">Generate API Key</button>
+                </form>
+                <div id="admin-gen-result" class="hidden mt-3 text-sm p-3 border border-color rounded bg-secondary" style="word-break: break-all;">
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- SVG Logo Gradient Definition -->
     <svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
         <linearGradient id="logo-grad" x2="1" y2="1">

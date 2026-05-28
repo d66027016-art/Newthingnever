@@ -680,3 +680,54 @@ body.telegram-mode #telegram-mini-app-view {
 .text-sm { font-size: 0.8rem; }
 .text-muted { color: var(--text-muted); }
 .text-danger { color: var(--color-danger); }
+
+/* Premium enhancements */
+.border-top {
+    border-top: 1px solid var(--border-color);
+}
+.pt-3 {
+    padding-top: 0.75rem;
+}
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+.font-semibold {
+    font-weight: 600;
+}
+
+/* Recent Checks log styling */
+.recent-check-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.8rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    transition: var(--transition);
+}
+
+.recent-check-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--color-primary);
+    transform: translateX(2px);
+}
+
+.recent-cc {
+    font-family: monospace;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+}
+
+.recent-details {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recent-response {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+

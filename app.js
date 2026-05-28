@@ -364,6 +364,50 @@ axios.post(url, data, { headers })
                     document.getElementById('mini-chk-time').textContent = `${result.time}s`;
 
                     miniCheckResult.classList.remove('hidden');
+
+                    // Update Session History Log
+                    const historyList = document.getElementById('mini-recent-checks-list');
+                    const emptyHistory = document.getElementById('mini-empty-history');
+                    if (historyList) {
+                        if (emptyHistory) {
+                            emptyHistory.remove();
+                        }
+
+                        const historyItem = document.createElement('div');
+                        historyItem.className = 'recent-check-item';
+
+                        // Mask card number for display
+                        let cardMasked = result.card;
+                        const parts = cardMasked.split('|');
+                        if (parts.length > 0) {
+                            const cc = parts[0];
+                            if (cc.length >= 12) {
+                                cardMasked = cc.substring(0, 6) + '******' + cc.substring(cc.length - 4);
+                            }
+                        }
+
+                        let badgeStyle = 'background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3);';
+                        if (result.status === 'CHARGED') {
+                            badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3);';
+                        } else if (result.status.includes('LIVE')) {
+                            badgeStyle = 'background: rgba(139, 92, 246, 0.15); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.3);';
+                        }
+
+                        historyItem.innerHTML = `
+                            <span class="recent-cc">${cardMasked}</span>
+                            <div class="recent-details">
+                                <span class="recent-response">${result.response ? result.response.substring(0, 15) : '-'}</span>
+                                <span class="badge text-xs" style="padding: 0.15rem 0.4rem; font-weight: 700; border-radius: 4px; ${badgeStyle}">${result.status}</span>
+                            </div>
+                        `;
+
+                        historyList.insertBefore(historyItem, historyList.firstChild);
+
+                        // Limit to 5 items
+                        while (historyList.children.length > 5) {
+                            historyList.removeChild(historyList.lastChild);
+                        }
+                    }
                     
                     // Refresh stats to show updated quota
                     loadUserStats();
